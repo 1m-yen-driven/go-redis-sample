@@ -56,21 +56,13 @@ func main() {
 	// User.Count を Transactionを使ってIncrByする
 	Measure("IncrBy User.Count (Transaction)", func() {
 		parallelUser(ctx, count, key, func() {
-			// errが出ず成功するまで試行する。key は複数指定可能
-			for nil != rdb.Watch(ctx, func(tx *redis.Tx) error {
-				user := User{}
-				// Read系を全て先に行う
+			user := User{}
+			OptmisticLockPipe(ctx, key, func(tx *redis.Tx) {
 				DecodePtrStringCmd(tx.Get(ctx, key), &user)
 				user.Count += 1
-				// Write系は全て後で行う
-				// ここのerrはトランザクションでは必須
-				_, err := tx.TxPipelined(ctx, func(pipe redis.Pipeliner) error {
-					pipe.Set(ctx, key, EncodePtr(&user), 0)
-					return nil
-				})
-				return err
-			}, key) {
-			}
+			}, func(pipe redis.Pipeliner) {
+				pipe.Set(ctx, key, EncodePtr(&user), 0)
+			})
 		})
 	})
 
@@ -81,8 +73,8 @@ func main() {
 	Measure("IncrBy User.Count (SetNX)", func() {
 		rdbForLock.FlushDB(ctx)
 		parallelUser(ctx, count, key, func() {
+			user := User{}
 			PessimiticLock(rdb, ctx, key, func() {
-				user := User{}
 				DecodePtrStringCmd(rdb.Get(ctx, key), &user)
 				user.Count += 1
 				rdb.Set(ctx, key, EncodePtr(&user), 0)
@@ -94,8 +86,8 @@ func main() {
 	// キーが増えてしまうが、Pipelineが効くので少し速い
 	Measure("IncrBy User.Count (SetNX Pipe)", func() {
 		parallelUser(ctx, count, key, func() {
+			user := User{}
 			PessimiticLockPipe(ctx, key, func(pipe redis.Pipeliner) {
-				user := User{}
 				DecodePtrStringCmd(rdb.Get(ctx, key), &user)
 				user.Count += 1
 				pipe.Set(ctx, key, EncodePtr(&user), 0)
@@ -104,7 +96,22 @@ func main() {
 	})
 }
 
-// -------------- 悲観ロック用 ------------------------------------
+// -------------- ロック用 ------------------------------------
+
+// 楽観ロック
+func OptmisticLockPipe(ctx context.Context, key string, rf func(tx *redis.Tx), wf func(redis.Pipeliner)) {
+	// errが出ず成功するまで試行する。key は複数指定可能
+	for nil != rdb.Watch(ctx, func(tx *redis.Tx) error {
+		rf(tx)
+		// ここの err が大事
+		_, err := tx.TxPipelined(ctx, func(pipe redis.Pipeliner) error {
+			wf(pipe)
+			return nil
+		})
+		return err
+	}, key) {
+	}
+}
 
 // 悲観ロック用のDBを作成
 var rdbForLock = redis.NewClient(&redis.Options{
