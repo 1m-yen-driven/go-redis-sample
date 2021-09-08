@@ -6,9 +6,11 @@ Redis + Go + MSGPack を使う際のサンプル集。
 
 ## 基本
 
-`go run basis.go util.go`
+`go run basic.go util.go`
 
-基本操作。MGet/MSetしないと遅い。パイプラインで改善可能。
+- 基本の文字列型＋MsgPackの操作。速度面でMGet/MSet推奨。パイプラインで改善可能。
+- EXISTS / DEL / KEYS / RENAME(NX) / DBSIZE / FLUSHDB
+- Get / Set / GetSet / MGet / MSet / IncrBy / Append
 
 ## パイプライン(トランザクションなし)
 

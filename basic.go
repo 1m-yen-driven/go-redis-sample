@@ -16,7 +16,7 @@ func EncodePtr(valuePtr interface{}) string {
 func DecodePtrStringCmd(input *redis.StringCmd, valuePtr interface{}) {
 	msgpack.Decode([]byte(input.Val()), valuePtr)
 }
-func DecodePtrSliceCmd(partsOfSliceCmd interface{}, valuePtr interface{}) {
+func DecodePtrSliceCmdElem(partsOfSliceCmd interface{}, valuePtr interface{}) {
 	msgpack.Decode([]byte(partsOfSliceCmd.(string)), valuePtr)
 }
 
@@ -27,22 +27,20 @@ var rdb = redis.NewClient(&redis.Options{
 })
 
 func main() {
-	fmt.Println("START")
+	fmt.Println("RUN: BASIC SAMPLE")
 	ctx := context.Background()
 	// Set / Get / GetSet
 	{
 		user := RandUser()
-		// ex1: no pipe, no transaction
 		rdb.Set(ctx, "aaa", EncodePtr(&user), 0)
 		user2 := User{}
 		DecodePtrStringCmd(rdb.Get(ctx, "aaa"), &user2)
-		fmt.Println(user, "\n", user2)
-		Assert(user == user2)
+		AssertEq(user, user2)
 		user3 := RandUser()
 		DecodePtrStringCmd(rdb.GetSet(ctx, "aaa", EncodePtr(&user3)), &user3)
-		Assert(user3 == user2)
+		AssertEq(user3, user2)
 		DecodePtrStringCmd(rdb.Get(ctx, "aaa"), &user3)
-		Assert(user3 != user2)
+		AssertNotEq(user3, user2)
 	}
 
 	// Exists / DBSize / Keys / Rename(NX) / Del
@@ -54,7 +52,8 @@ func main() {
 		cnt := rdb.DBSize(ctx).Val()
 		Assert(cnt == 1)
 		keys := rdb.Keys(ctx, "*").Val()
-		Assert(len(keys) == 1 && keys[0] == "aaa")
+		Assert(len(keys) == 1)
+		AssertEq(keys[0], "aaa")
 		rdb.Rename(ctx, "aaa", "bbb")
 		del := rdb.Del(ctx, "aaa", "bbb").Val()
 		Assert(del == 1)
@@ -75,8 +74,8 @@ func main() {
 		// parse in for loop
 		for i, got := range rdb.MGet(ctx, keys...).Val() {
 			user := User{}
-			DecodePtrSliceCmd(got, &user)
-			Assert(user == users[i])
+			DecodePtrSliceCmdElem(got, &user)
+			AssertEq(user, users[i])
 		}
 	}
 
@@ -86,9 +85,9 @@ func main() {
 		rdb.Set(ctx, "aaa", strconv.Itoa(100), 0)
 		rdb.IncrBy(ctx, "aaa", 234)
 		x, _ := strconv.Atoi(rdb.Get(ctx, "aaa").Val())
-		Assert(x == 334)
+		AssertEq(x, 334)
 		rdb.Append(ctx, "aaa", "0")
 		x, _ = strconv.Atoi(rdb.Get(ctx, "aaa").Val())
-		Assert(x == 3340)
+		AssertEq(x, 3340)
 	}
 }

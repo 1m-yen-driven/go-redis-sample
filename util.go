@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math/rand"
 	"strconv"
 	"time"
@@ -34,6 +35,24 @@ func RandUser() User {
 
 func Assert(cond bool) {
 	if !cond {
+		panic("assertion failed")
+	}
+}
+
+func AssertEq(a, b interface{}) {
+	if a != b {
+		fmt.Println(a)
+		fmt.Println("IS NOT")
+		fmt.Println(b)
+		panic("assertion failed")
+	}
+}
+
+func AssertNotEq(a, b interface{}) {
+	if a == b {
+		fmt.Println(a)
+		fmt.Println("IS")
+		fmt.Println(b)
 		panic("assertion failed")
 	}
 }
