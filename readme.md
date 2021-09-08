@@ -89,6 +89,25 @@ Redis + Go + MSGPack を使う際のサンプル集。
 
 `go run hashtable.go util.go`
 
+TODO
+
+- 取得更新： H(M)GET / H(M)SET / HEXSITS / HDEL / HLEN
+- (数値：HINCRBY)
+- 全取得：HKEYS / HVALS / HGETALL
+
+
 ### ジオメトリ操作
 
 `go run geo.go util.go`
+
+TODO
+
+- http://mogile.web.fc2.com/redis/commands/geoadd.html
+- https://redis.com/redis-best-practices/indexing-patterns/geospatial/
+- 「緯度(-85 ~ 85)・経度(-180 ~ 180)・名称」を保存して検索可能
+- 追加削除：GEOADD / ZREM
+- 取得：GEOPOSS
+- 二点間距離：GEODIST
+- https://ja.wikipedia.org/wiki/ジオハッシュ ：GEOHASH
+- 位置＋半径で検索：GEORADIUS(BYMEMBER)(STORE)
+- 位置＋BOXで検索：GEOSEARCH{LOCATION, STORE}
