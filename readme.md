@@ -4,12 +4,13 @@ Redis + Go + MSGPack を使う際のサンプル集。
 
 - systemctl で enable して再起動後の動作保証を忘れないこと。
 - Redisはコマンドを送るまでは落ちないので、起動順序問題は通常は大丈夫
+- https://pkg.go.dev/github.com/go-redis/redis/v8
 
 ## 基本
 
 `go run basic.go util.go`
 
-- 基本の文字列型＋MsgPackの操作。速度面でMGet/MSet推奨。パイプラインで改善可能。
+- 基本の文字列型＋MsgPackの操作。速度面でMGet/MSet推奨。パイプラインで高速化可能。
 - Exists / Del / Keys / Rename(NX) / DBSize / FlushDB
 - Get / Set / GetSet / MGet / MSet / IncrBy / Append
 
@@ -21,17 +22,42 @@ Redis + Go + MSGPack を使う際のサンプル集。
 - ただし、MSet/MGetを使ったほうが速い
 - Get / Set / MGet / MSet
 
-## トランザクション+パイプライン
+## トランザクション
 
 `go run tx.go util.go`
 
-- 楽観ロックなので成功するまでやる必要がある
+- 通常の書き方では楽観ロックなので成功するまでやる必要がある
+  - 同じキーに対しての書き込みが多いと効率が悪い
+- [SetNXを使えば悲観ロックも可能](http://redis.shibu.jp/commandreference/strings.html)なので、そのサンプルもあり
+  - トランザクションなし:  40ms
+  - 楽観ロック: 600ms
+  - 悲観ロック: 134ms
+  - ISUCONでは適宜悲観ロックした方がいい
+- Watch / SetNX
+
 
 ## Echo 上での動作サンプル
 
 `go run echo.go util.go`
 
-## コンテナの型別
+## Redis-Cli で見える MSGPackされたオブジェクトをパースするサンプル
+
+`go run parsecli.go util.go`
+
+
+- https://github.com/go-redis/redis/blob/master/example_test.go
+  - SlowLogも
+
+## Pub / Sub
+
+`go run pubsub.go util.go`
+
+## コレクションの型別
+
+多くの種類のコレクションが使えるので、そのサンプル
+
+- http://redis.shibu.jp/commandreference/index.html
+- http://mogile.web.fc2.com/redis/commands/geoadd.html
 
 ###　双方向リスト
 

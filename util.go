@@ -4,8 +4,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/google/uuid"
 	"math/rand"
-	"strconv"
 	"time"
 )
 
@@ -23,11 +23,8 @@ func Random() int {
 	return rand.Intn(100)
 }
 func RandStr() string {
-	result := "あいうえおかきくけこ"
-	for i := 0; i < 100; i++ {
-		result += strconv.Itoa(Random())
-	}
-	return result
+	uuid, _ := uuid.NewUUID()
+	return uuid.String()
 }
 func RandUser() User {
 	return User{
@@ -67,8 +64,8 @@ func AssertNotEq(a, b interface{}) {
 // Measure ----------------------------------
 //
 func Measure(title string, f func()) {
+	fmt.Println("###", title, "###")
 	now := time.Now()
 	f()
-	fmt.Println(title)
 	fmt.Println(time.Since(now))
 }

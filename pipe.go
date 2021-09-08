@@ -25,33 +25,6 @@ var rdb = redis.NewClient(&redis.Options{
 	DB:   0, // 0 - 15
 })
 
-func initialize(ctx context.Context) (keys []string, users []User) {
-	keys = []string{}
-	users = []User{}
-	for i := 0; i < 10000; i++ {
-		keys = append(keys, RandStr())
-		users = append(users, RandUser())
-	}
-	// initialize
-	rdb.FlushDB(ctx)
-	for i, _ := range keys {
-		rdb.Set(ctx, keys[i], EncodePtr(&users[i]), 0)
-	}
-	return keys, users
-}
-func mark(user *User) {
-	user.Name += "(READ)"
-}
-func check(ctx context.Context, keys []string, users []User) {
-	for i, _ := range keys {
-		user := User{}
-		DecodePtrStringCmd(rdb.Get(ctx, keys[i]), &user)
-		user2 := users[i]
-		mark(&user2)
-		AssertEq(user, user2)
-	}
-}
-
 // 通常の Get / Set をパイプライン化して高速化されることを確認するサンプル
 func main() {
 	fmt.Println("RUN: PIPELINE SAMPLE")
@@ -105,4 +78,33 @@ func main() {
 		rdb.MSet(ctx, mset)
 	})
 	check(ctx, keys, users)
+}
+
+// -------------------- テスト用 ------------------------------
+
+func initialize(ctx context.Context) (keys []string, users []User) {
+	keys = []string{}
+	users = []User{}
+	for i := 0; i < 10000; i++ {
+		keys = append(keys, RandStr())
+		users = append(users, RandUser())
+	}
+	// initialize
+	rdb.FlushDB(ctx)
+	for i, _ := range keys {
+		rdb.Set(ctx, keys[i], EncodePtr(&users[i]), 0)
+	}
+	return keys, users
+}
+func mark(user *User) {
+	user.Name += "(READ)"
+}
+func check(ctx context.Context, keys []string, users []User) {
+	for i, _ := range keys {
+		user := User{}
+		DecodePtrStringCmd(rdb.Get(ctx, keys[i]), &user)
+		user2 := users[i]
+		mark(&user2)
+		AssertEq(user, user2)
+	}
 }
