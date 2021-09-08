@@ -70,6 +70,11 @@ Redis + Go + MSGPack を使う際のサンプル集。
 
 `go run set.go util.go`
 
+- 取得：SISMEMBER / SCARD / SMEMBERS
+- 追加削除： SADD / SREM
+- セット操作： S{INTER, UNION, DIFF}(STORE)  / SMOVE
+
+
 ### ソート済みセット
 
 `go run sortedset.go util.go`
