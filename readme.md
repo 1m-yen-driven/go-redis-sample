@@ -74,10 +74,16 @@ Redis + Go + MSGPack を使う際のサンプル集。
 - 追加削除： SADD / SREM
 - セット操作： S{INTER, UNION, DIFF}(STORE)  / SMOVE
 
-
 ### ソート済みセット
 
 `go run sortedset.go util.go`
+
+- 「Score(float) 付きのテーブル」で、Scoreを順序で検索可能
+- 取得：Z(REV)RANK  / ZCARD / ZSCORE
+- 追加削除： ZADD / ZREM
+- スコア更新： ZINCRBY
+- 順序クエリ：Z{,REV,REM}RANGE{,BYSCORE} / ZCOUNT
+- 集合操作(キー複合時はSum/Min/Maxで選べる)： ZUIONSTORE / ZINTERSTORE
 
 ### ハッシュテーブル
 
