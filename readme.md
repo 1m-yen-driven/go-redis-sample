@@ -33,12 +33,13 @@ Redis + Go + MSGPack を使う際のサンプル集。
   - 楽観ロック: 600ms
   - 悲観ロック: 134ms
   - ISUCONでは適宜悲観ロックした方がいい
-- Watch / SetNX
-
+- Watch / TxPipelined / SetNX
 
 ## Echo 上での動作サンプル
 
 `go run echo.go util.go`
+
+- `ctx := c.Request().Context()`
 
 ## Redis-Cli で見える MSGPackされたオブジェクトをパースするサンプル
 
