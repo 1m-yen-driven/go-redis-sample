@@ -49,12 +49,7 @@ Redis + Go + MSGPack を使う際のサンプル集。
   - `echo 'keys *' | redis-cli | sed 's/^/get /' | redis-cli | go run rediscli.go util.go parse`
 - [SlowLog](https://redis.io/commands/slowlog)
   - `> slowlog get 10`
-  - id / unix-timestamp / time(micro sec) / commands / ipaddr / client-name
-  - コマンドくらいしかわからないので、活用は少し難しいか
-
-## Pub / Sub
-
-`go run pubsub.go util.go`
+  - time(micro sec) / command は把握可能
 
 ## コレクションの型別
 
@@ -66,6 +61,10 @@ Redis + Go + MSGPack を使う際のサンプル集。
 ###　双方向リスト
 
 `go run list.go util.go`
+
+- 取得更新：LINDEX / LSET / LRANGE / LLEN
+- 追加削除：{L,R}PUSH / {L,R}POP / RPOPLPUSH
+- リスト操作：LTRIM / LREM
 
 ### セット
 
