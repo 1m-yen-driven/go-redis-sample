@@ -1,5 +1,7 @@
 package main
 
+// only for Random / User Type / Assert / Measure
+
 import (
 	"fmt"
 	"math/rand"
@@ -7,6 +9,9 @@ import (
 	"time"
 )
 
+//
+// User Type & Random -----------------------------
+//
 type User struct {
 	ID        int64
 	Name      string
@@ -33,12 +38,14 @@ func RandUser() User {
 	}
 }
 
+//
+// Assert --------------------------------
+//
 func Assert(cond bool) {
 	if !cond {
 		panic("assertion failed")
 	}
 }
-
 func AssertEq(a, b interface{}) {
 	if a != b {
 		fmt.Println(a)
@@ -47,7 +54,6 @@ func AssertEq(a, b interface{}) {
 		panic("assertion failed")
 	}
 }
-
 func AssertNotEq(a, b interface{}) {
 	if a == b {
 		fmt.Println(a)
@@ -55,4 +61,14 @@ func AssertNotEq(a, b interface{}) {
 		fmt.Println(b)
 		panic("assertion failed")
 	}
+}
+
+//
+// Measure ----------------------------------
+//
+func Measure(title string, f func()) {
+	now := time.Now()
+	f()
+	fmt.Println(title)
+	fmt.Println(time.Since(now))
 }

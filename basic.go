@@ -20,7 +20,6 @@ func DecodePtrSliceCmdElem(partsOfSliceCmd interface{}, valuePtr interface{}) {
 	msgpack.Decode([]byte(partsOfSliceCmd.(string)), valuePtr)
 }
 
-// コマンドを送るまでは落ちないので、起動順序問題は通常大丈夫
 var rdb = redis.NewClient(&redis.Options{
 	Addr: "127.0.0.1:6379",
 	DB:   0, // 0 - 15
