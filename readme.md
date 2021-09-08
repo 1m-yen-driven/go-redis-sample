@@ -58,7 +58,7 @@ Redis + Go + MSGPack を使う際のサンプル集。
 - http://redis.shibu.jp/commandreference/index.html
 - http://mogile.web.fc2.com/redis/commands/geoadd.html
 
-###　双方向リスト
+### 双方向リスト
 
 `go run list.go util.go`
 
