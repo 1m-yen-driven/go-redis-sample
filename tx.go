@@ -5,11 +5,12 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
-	"github.com/go-redis/redis/v8"
-	"github.com/shamaton/msgpack"
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/go-redis/redis/v8"
+	"github.com/shamaton/msgpack"
 )
 
 // Encode / Decode
@@ -130,7 +131,7 @@ func PessimiticLock(rdb *redis.Client, ctx context.Context, key string, f func()
 
 // 悲観ロック用のDBを使わずPipelineを使用するもの
 func PessimiticLockPipe(ctx context.Context, key string, f func(redis.Pipeliner)) {
-	// 他のキーと強豪しないようにmd5しておく(キー数が増えてしまうので注意)
+	// 他のキーと競合しないようにmd5しておく(キー数が増えてしまうので注意)
 	lockHash := md5.Sum([]byte(key))
 	lockKey := hex.EncodeToString(lockHash[:])
 	for {
