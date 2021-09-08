@@ -41,13 +41,16 @@ Redis + Go + MSGPack を使う際のサンプル集。
 
 - `ctx := c.Request().Context()`
 
-## Redis-Cli で見える MSGPackされたオブジェクトをパースするサンプル
+## Redis-Cli 連携
 
-`go run parsecli.go util.go`
+`go run rediscli.go util.go`
 
-
-- https://github.com/go-redis/redis/blob/master/example_test.go
-  - SlowLogも
+- MSGPack されたものをパースするサンプル
+  - `echo 'keys *' | redis-cli | sed 's/^/get /' | redis-cli | go run rediscli.go util.go parse`
+- [SlowLog](https://redis.io/commands/slowlog)
+  - `> slowlog get 10`
+  - id / unix-timestamp / time(micro sec) / commands / ipaddr / client-name
+  - コマンドくらいしかわからないので、活用は少し難しいか
 
 ## Pub / Sub
 
