@@ -111,3 +111,7 @@ TODO
 - https://ja.wikipedia.org/wiki/ジオハッシュ ：GEOHASH
 - 位置＋半径で検索：GEORADIUS(BYMEMBER)(STORE)
 - 位置＋BOXで検索：GEOSEARCH{LOCATION, STORE}
+
+## Pub / Sub / Stream
+
+- 双方向リストで良くない？
