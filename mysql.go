@@ -39,38 +39,55 @@ func main() {
 		}
 		pipe.Exec(ctx)
 	})
-	Measure("MySQL: Bulk Insert 1", func() {
-		if _, err := mdb.NamedExec(
-			"INSERT INTO user(id, name, count, created_at)"+
-				"VALUES(:id, :name, :count, :created_at)", users); err != nil {
-			panic(err)
-		}
-	})
+	for i := 0; i < 4; i++ {
+		mdb.Exec("TRUNCATE TABLE user")
+		Measure("MySQL: Bulk Insert", func() {
+			args := []interface{}{}
+			for _, u := range users {
+				args = append(args, u.ID, u.Name, u.Count, u.CreatedAt)
+			}
+			query := "INSERT INTO user(id, name, count, created_at) VALUES "
+			query += strings.Repeat("(?,?,?,?),", len(users))
+			query = query[:len(query)-1]
+			if _, err := mdb.Exec(query, args...); err != nil {
+				panic(err)
+			}
+		})
+
+		mdb.Exec("TRUNCATE TABLE user")
+		Measure("MySQL: Bulk Insert (Named)", func() {
+			if _, err := mdb.NamedExec(
+				"INSERT INTO user(id, name, count, created_at)"+
+					"VALUES(:id, :name, :count, :created_at)", users); err != nil {
+				panic(err)
+			}
+		})
+	}
+
+	// MySQL multi statement is too slow...
 	mdb.Exec("TRUNCATE TABLE user")
-	Measure("MySQL: Bulk Insert 2", func() {
+	Measure("MySQL: MultiStatement Insert", func() {
 		args := []interface{}{}
 		for _, u := range users {
 			args = append(args, u.ID, u.Name, u.Count, u.CreatedAt)
 		}
-		query := "INSERT INTO user(id, name, count, created_at) VALUES "
-		query += strings.Repeat("(?,?,?,?),", len(users))
-		query = query[:len(query)-1]
+		query := "INSERT INTO user(id, name, count, created_at) VALUES (?,?,?,?);"
+		query = strings.Repeat(query, len(users))
 		if _, err := mdb.Exec(query, args...); err != nil {
 			panic(err)
 		}
 	})
-	// MySQL multi statement is too slow...
-	// Measure("MySQL: Bulk Insert 3", func() {
-	// 	args := []interface{}{}
-	// 	for _, u := range users {
-	// 		args = append(args, u.ID, u.Name, u.Count, u.CreatedAt)
-	// 	}
-	// 	query := "INSERT INTO user(id, name, count, created_at) VALUES (?,?,?,?);"
-	// 	query = strings.Repeat(query, len(users))
-	// 	if _, err := mdb.Exec(query, args...); err != nil {
-	// 		panic(err)
-	// 	}
-	// })
+	// normal insert
+	mdb.Exec("TRUNCATE TABLE user")
+	Measure("MySQL: Insert N+1", func() {
+		for _, u := range users {
+			query := "INSERT INTO user(id, name, count, created_at) VALUES (?,?,?,?);"
+			args := []interface{}{u.ID, u.Name, u.Count, u.CreatedAt}
+			if _, err := mdb.Exec(query, args...); err != nil {
+				panic(err)
+			}
+		}
+	})
 
 	// select time
 	user := []User{}
@@ -86,7 +103,7 @@ func initialize() (keys []string, users []User) {
 	ctx := context.Background()
 	keys = []string{}
 	users = []User{}
-	for i := 0; i < 20000; i++ {
+	for i := 0; i < 10000; i++ {
 		keys = append(keys, RandStr())
 		users = append(users, RandUser())
 	}
