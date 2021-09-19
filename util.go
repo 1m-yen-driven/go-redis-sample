@@ -13,10 +13,11 @@ import (
 // User Type & Random -----------------------------
 //
 type User struct {
-	ID        int64
-	Name      string
-	Count     int
-	CreatedAt time.Time // time.Time は truncate必須。pointer型は不可
+	ID        int64     `db:"id"`
+	Name      string    `db:"name"`
+	Count     int       `db:"count"`
+	CreatedAt time.Time `db:"created_at"`
+	// time.Time は truncate必須。pointer型は不可
 }
 
 func Random() int {

@@ -19,7 +19,10 @@ Redis + Go + MSGPack を使う際のサンプル集。
 `go run pipe.go util.go`
 
 - Execute() をするまでは値が定まらないが、一括で実行できるので、高速。
-- ただし、MSet/MGetを使ったほうが速い
+  ただし、MSet/MGetを使ったほうが少し速い
+  - NO PIPE : 354.7ms
+  - PIPE : 22.8ms
+  - MSET : 18.6ms
 - Get / Set / MGet / MSet
 
 ## トランザクション
@@ -50,6 +53,13 @@ Redis + Go + MSGPack を使う際のサンプル集。
 - [SlowLog](https://redis.io/commands/slowlog)
   - `> slowlog get 10`
   - time(micro sec) / command は把握可能
+
+## MySQL 連携
+
+`go run mysql.go util.go`
+
+- MySQLにあるデータを持ってくるサンプル
+- MySQLとの速度比較も
 
 ## コレクションの型別
 
